@@ -8,7 +8,6 @@ mongoose.connect('mongodb://localhost:27017/kindermaniacdb', {
   useCreateIndex: true,
   useFindAndModify: false
 })
-//
 
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}`)
