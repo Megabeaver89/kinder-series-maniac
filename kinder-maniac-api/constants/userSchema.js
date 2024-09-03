@@ -1,7 +1,7 @@
-const nickNameText = '"Никнейм"'
-const nameText = '"Имя"'
-const surnameText = '"Фамилия"'
-const emailText = '"Email"'
-const passwordText = '"Password"'
+const nickNameText = '"nickname"'
+const nameText = '"name"'
+const surnameText = '"surname"'
+const emailText = '"email"'
+const passwordText = '"password"'
 
 module.exports = { nickNameText, nameText, surnameText, emailText, passwordText }
