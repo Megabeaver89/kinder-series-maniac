@@ -21,6 +21,7 @@
       "never"
     ],
     "consistent-return": "off",
-    "object-curly-newline": "off"
+    "object-curly-newline": "off",
+    "linebreak-style": "off"
   }
 }

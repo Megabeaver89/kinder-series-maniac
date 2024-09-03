@@ -10,8 +10,10 @@
   "author": "Mikhail Bobrenko",
   "license": "ISC",
   "dependencies": {
+    "bcryptjs": "^2.4.3",
     "express": "^4.19.2",
-    "mongoose": "^8.6.0"
+    "mongoose": "^8.6.0",
+    "validator": "^13.12.0"
   },
   "devDependencies": {
     "eslint": "^8.57.0",
