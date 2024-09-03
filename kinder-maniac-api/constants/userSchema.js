@@ -1,7 +1,7 @@
-const nickName = '"Никнейм"'
-const name = '"Имя"'
-const surname = '"Фамилия"'
-const email = '"Email"'
-const password = '"Password"'
+const nickNameText = '"Никнейм"'
+const nameText = '"Имя"'
+const surnameText = '"Фамилия"'
+const emailText = '"Email"'
+const passwordText = '"Password"'
 
-module.exports = { nickName, name, surname, email, password }
+module.exports = { nickNameText, nameText, surnameText, emailText, passwordText }

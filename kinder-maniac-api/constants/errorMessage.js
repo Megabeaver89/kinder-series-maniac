@@ -1,4 +1,4 @@
 const incorrectEmail = 'Некорректный Email'
-const incorrextLoginOrPassword = 'Вы ввели неправильный логин или пароль'
+const incorreсtLoginOrPassword = 'Вы ввели неправильный логин или пароль'
 
-module.exports = { incorrectEmail, incorrextLoginOrPassword }
+module.exports = { incorrectEmail, incorreсtLoginOrPassword }
