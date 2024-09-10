@@ -7,13 +7,13 @@ const {
   year,
   country,
   numberOfFigures,
-  costAmount,
   currency,
   description,
   image,
 } = require('../constants/seriesSchema')
 const { incorrectUrlImage } = require('../constants/errorMessage')
 const { EUR } = require('../constants/currency')
+const figureSchema = require('./figure')
 
 const seriesSchema = new mongoose.Schema({
   nameRu: {
@@ -39,7 +39,7 @@ const seriesSchema = new mongoose.Schema({
   costAmount: {
     amount: {
       type: Number,
-      required: [true, mustBeFilled(costAmount)],
+      default: 0,
     },
     currency: {
       type: String,
@@ -59,6 +59,15 @@ const seriesSchema = new mongoose.Schema({
       message: incorrectUrlImage,
     },
   },
+  figures: [figureSchema],
+})
+
+// Хук для автоматического пересчета стоимости серии на основе стоимости фигурок
+seriesSchema.pre('save', function (next) {
+  const totalCost = this.figures.reduce((sum, figure) => sum + (figure.costAmount || 0), 0)
+  this.costAmount.amount = totalCost
+
+  next()
 })
 
 module.exports = mongoose.model('series', seriesSchema)
