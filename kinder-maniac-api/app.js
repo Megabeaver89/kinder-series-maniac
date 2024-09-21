@@ -8,6 +8,7 @@ const { errors } = require('celebrate')
 const handlerError = require('./middlewares/handlerError')
 const cookieParser = require('cookie-parser')
 const helmet = require('helmet')
+const rateLimiter = require('./middlewares/rateLimiter')
 
 mongoose.connect(DB_ADDRESS, {
   useNewUrlParser: true,
@@ -15,6 +16,7 @@ mongoose.connect(DB_ADDRESS, {
   useFindAndModify: false,
 })
 const app = express()
+app.use(rateLimiter)
 app.use(helmet())
 app.use(cookieParser())
 app.use('/api', router)
