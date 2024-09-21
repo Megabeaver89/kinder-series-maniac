@@ -9,8 +9,6 @@ mongoose.connect(DB_ADDRESS, {
 })
 const app = express()
 
-
-
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}`)
 })
