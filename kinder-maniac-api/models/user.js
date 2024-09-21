@@ -3,29 +3,17 @@ const validator = require('validator')
 const bcrypt = require('bcryptjs')
 const { mustBeFilled } = require('../helpers/mustBeFilled')
 const UnauthorizedError = require('../errors/UnauthorizedError')
-const { nickNameText, nameText, surnameText, emailText, passwordText } = require('../constants/userSchema')
+const { nicknameText, emailText, passwordText } = require('../constants/userSchema')
 const { maxLengthField, minLengthField, lengthTwo, lengthThirty } = require('../constants/schema')
 const { insertErrorText } = require('../helpers/insertErrorText')
 const { incorrectEmail, incorreсtLoginOrPassword } = require('../constants/errorMessage')
 
 const userSchema = new mongoose.Schema({
-  nickName: {
+  nickname: {
     type: String,
-    required: [true, mustBeFilled(nickNameText)],
-    minlength: [2, insertErrorText(minLengthField, nickNameText, lengthTwo)],
-    maxlength: [30, insertErrorText(maxLengthField, nickNameText, lengthThirty)],
-  },
-  name: {
-    type: String,
-    required: [true, mustBeFilled(nameText)],
-    minlength: [2, insertErrorText(minLengthField, nameText, lengthTwo)],
-    maxlength: [30, insertErrorText(maxLengthField, nameText, lengthThirty)],
-  },
-  surname: {
-    type: String,
-    required: [true, mustBeFilled(surnameText)],
-    minlength: [2, insertErrorText(minLengthField, surnameText, lengthTwo)],
-    maxlength: [30, insertErrorText(maxLengthField, surnameText, lengthThirty)],
+    required: [true, mustBeFilled(nicknameText)],
+    minlength: [2, insertErrorText(minLengthField, nicknameText, lengthTwo)],
+    maxlength: [30, insertErrorText(maxLengthField, nicknameText, lengthThirty)],
   },
   email: {
     type: String,

@@ -14,7 +14,7 @@ const handlerError = (err, req, res, next) => {
     .status(statusCode)
     .send({
       message: statusCode === INTERNAL_SERVER_ERROR
-        ? `${INTERNAL_SERVER_ERROR.toString()} ${serverError}`
+        ? `${INTERNAL_SERVER_ERROR} ${serverError}`
         : message,
     })
   next()

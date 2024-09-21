@@ -11,20 +11,20 @@ const { MONGO_DUPLICATE_KEY_ERROR_CODE } = require('../constants/errorCodes')
 const { JWT_SECRET } = require('../config')
 
 const createUser = (req, res, next) => {
-  const { nickName, email, password } = req.body
+  const { nickname, email, password } = req.body
   if (!password) {
     return next(new BadRequestError(passwordRequired))
   }
   bcrypt.hash(password, 10)
     .then((hash) => {
       userModel.create({
-        nickName,
+        nickname,
         email,
         password: hash,
       })
         .then((newUser) => res.status(CREATED).send({
           _id: newUser._id,
-          nickName: newUser.nickName,
+          nickname: newUser.nickname,
           email: newUser.email,
         }))
         .catch((err) => {
