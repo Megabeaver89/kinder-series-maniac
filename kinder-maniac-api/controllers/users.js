@@ -33,3 +33,13 @@ const createUser = (req, res, next) => {
     })
     .catch(next)
 }
+
+const loginUser = (req, res, next) => {
+  const userId = req.user._id
+  userModel.findUserByCredentials(email, password, next)
+    .then((user) => {
+      const token = jwt.sign(
+        { _id: user._id },
+      )
+  })
+}
