@@ -9,6 +9,7 @@ const handlerError = require('./middlewares/handlerError')
 const cookieParser = require('cookie-parser')
 const helmet = require('helmet')
 const rateLimiter = require('./middlewares/rateLimiter')
+const { requestLogger, errorLogger } = require('./middlewares/logger')
 
 mongoose.connect(DB_ADDRESS, {
   useNewUrlParser: true,
@@ -17,12 +18,15 @@ mongoose.connect(DB_ADDRESS, {
 })
 const app = express()
 app.use(rateLimiter)
+app.use(express.json())
 app.use(helmet())
+app.use(requestLogger)
 app.use(cookieParser())
 app.use('/api', router)
 app.use((req, res, next) => {
   next(new NotFoundError(pageNotFound))
 })
+app.use(errorLogger)
 app.use(errors())
 app.use(handlerError)
 
