@@ -1,4 +1,5 @@
 const bcrypt = require('bcryptjs')
+const jwt = require('jsonwebtoken')
 const userModel = require('../models/user')
 const ExistingEmailError = require('../errors/ExistingEmailError')
 const BadRequestError = require('../errors/BadRequestError')
@@ -7,6 +8,7 @@ const UnauthorizedError = require('../errors/UnauthorizedError')
 const { passwordRequired, existingEmail } = require('../constants/errorMessage')
 const { CREATED } = require('../constants/statusCodes')
 const { MONGO_DUPLICATE_KEY_ERROR_CODE } = require('../constants/errorCodes')
+const { JWT_SECRET } = require('../config')
 
 const createUser = (req, res, next) => {
   const { nickName, email, password } = req.body
@@ -40,6 +42,14 @@ const loginUser = (req, res, next) => {
     .then((user) => {
       const token = jwt.sign(
         { _id: user._id },
+        JWT_SECRET,
+        { expiresIn: '3d' },
       )
-  })
+      res.cookie('jwt', token, {
+        maxAge: 3600000 * 24 * 3,
+        httpOnly: true,
+      })
+        .send({ token })
+    })
+    .catch(next)
 }
