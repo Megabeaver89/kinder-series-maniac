@@ -7,6 +7,7 @@ const { pageNotFound } = require('./constants/errorMessage')
 const { errors } = require('celebrate')
 const handlerError = require('./middlewares/handlerError')
 const cookieParser = require('cookie-parser')
+const helmet = require('helmet')
 
 mongoose.connect(DB_ADDRESS, {
   useNewUrlParser: true,
@@ -14,6 +15,7 @@ mongoose.connect(DB_ADDRESS, {
   useFindAndModify: false,
 })
 const app = express()
+app.use(helmet())
 app.use(cookieParser())
 app.use('/api', router)
 app.use((req, res, next) => {
