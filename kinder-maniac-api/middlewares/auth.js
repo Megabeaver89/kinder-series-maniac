@@ -8,4 +8,13 @@ const auth = (req, res, next) => {
   if (!authorization || !authorization.startsWith('Bearer ')) {
     next(new UnauthorizedError(authorizationRequired))
   }
+  const token = authorization.replace('Bearer ', '')
+  let payload
+  try {
+    payload = jwt.verify(token, JWT_SECRET)
+  } catch (err) {
+    return next(new UnauthorizedError(authorizationRequired))
+  }
+  req.user = payload
+  next()
 }
