@@ -37,7 +37,7 @@ const createUser = (req, res, next) => {
 }
 
 const loginUser = (req, res, next) => {
-  const userId = req.user._id
+  const { email, password } = req.body
   userModel.findUserByCredentials(email, password, next)
     .then((user) => {
       const token = jwt.sign(

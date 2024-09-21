@@ -3,6 +3,7 @@ const incorreсtLoginOrPassword = 'Вы ввели неправильный ло
 const incorrectUrlImage = 'Некорректный URL ссылки на изображение'
 const passwordRequired = 'Поле "password" является обязательным'
 const existingEmail = 'Пользователь с таким email уже существует'
+const authorizationRequired = 'Необходима авторизация'
 
 module.exports = {
   incorrectEmail,
@@ -10,4 +11,5 @@ module.exports = {
   incorrectUrlImage,
   passwordRequired,
   existingEmail,
+  authorizationRequired,
 }
