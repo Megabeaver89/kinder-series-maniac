@@ -5,15 +5,17 @@ const ExistingEmailError = require('../errors/ExistingEmailError')
 const BadRequestError = require('../errors/BadRequestError')
 const NotFoundError = require('../errors/NotFoundError')
 const UnauthorizedError = require('../errors/UnauthorizedError')
-const { passwordRequired, existingEmail } = require('../constants/errorMessage')
+const { PASSWORD_REQUIRED, EXISTING_EMAIL, AUTHORIZATION_REQUIRED } = require('../constants/errorMessage')
 const { CREATED } = require('../constants/statusCodes')
 const { MONGO_DUPLICATE_KEY_ERROR_CODE } = require('../constants/errorCodes')
 const { JWT_SECRET } = require('../config')
+const { USER_LOGGED_OUT_SUCCESS } = require('../constants/message')
+const { JWT_COOKIE_MAX_AGE, JWT_COOKIE_NAME, JWT_EXPIRATION } = require('../constants/cookieConfig')
 
 const createUser = (req, res, next) => {
   const { nickname, email, password } = req.body
   if (!password) {
-    return next(new BadRequestError(passwordRequired))
+    return next(new BadRequestError(PASSWORD_REQUIRED))
   }
   bcrypt.hash(password, 10)
     .then((hash) => {
@@ -29,7 +31,7 @@ const createUser = (req, res, next) => {
         }))
         .catch((err) => {
           if (err.code === MONGO_DUPLICATE_KEY_ERROR_CODE) {
-            return next(new ExistingEmailError(existingEmail))
+            return next(new ExistingEmailError(EXISTING_EMAIL))
           }
         })
     })
@@ -43,14 +45,26 @@ const loginUser = (req, res, next) => {
       const token = jwt.sign(
         { _id: user._id },
         JWT_SECRET,
-        { expiresIn: '3d' },
+        { expiresIn: JWT_EXPIRATION },
       )
-      res.cookie('jwt', token, {
-        maxAge: 3600000 * 24 * 3,
+      res.cookie(JWT_COOKIE_NAME, token, {
+        maxAge: JWT_COOKIE_MAX_AGE,
         httpOnly: true,
         sameSite: true,
       })
         .send({ token })
     })
     .catch(next)
+}
+
+const signoutUser = (req, res, next) => {
+  if (!req.cookies.jwt) {
+    return next(new UnauthorizedError(AUTHORIZATION_REQUIRED))
+  }
+  try {
+    res.clearCookie(JWT_COOKIE_NAME)
+      .send({ message: USER_LOGGED_OUT_SUCCESS })
+  } catch (err) {
+    next(err)
+  }
 }
