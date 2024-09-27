@@ -1,13 +1,15 @@
 const express = require('express')
+const cors = require('cors')
 const mongoose = require('mongoose')
+const helmet = require('helmet')
+const { errors } = require('celebrate')
+const cookieParser = require('cookie-parser')
 const { PORT, DB_ADDRESS } = require('./config')
 const router = require('./routes')
 const NotFoundError = require('./errors/NotFoundError')
 const { pageNotFound } = require('./constants/errorMessage')
-const { errors } = require('celebrate')
 const handlerError = require('./middlewares/handlerError')
-const cookieParser = require('cookie-parser')
-const helmet = require('helmet')
+
 const rateLimiter = require('./middlewares/rateLimiter')
 const { requestLogger, errorLogger } = require('./middlewares/logger')
 
@@ -17,6 +19,7 @@ mongoose.connect(DB_ADDRESS, {
   useFindAndModify: false,
 })
 const app = express()
+app.use(cors())
 app.use(rateLimiter)
 app.use(express.json())
 app.use(helmet())
