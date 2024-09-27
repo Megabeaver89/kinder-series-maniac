@@ -1,13 +1,13 @@
-const nameEn = '"nameEN"'
-const costAmount = '"cost amount"'
-const currency = '"currency"'
-const description = '"description"'
-const image = '"image"'
+const NAME_EN = '"nameEN"'
+const COST_AMOUNT = '"cost amount"'
+const CURRENCY = '"currency"'
+const DESCRIPTION = '"description"'
+const IMAGE = '"image"'
 
 module.exports = {
-  nameEn,
-  costAmount,
-  currency,
-  description,
-  image,
+  NAME_EN,
+  COST_AMOUNT,
+  CURRENCY,
+  DESCRIPTION,
+  IMAGE,
 }

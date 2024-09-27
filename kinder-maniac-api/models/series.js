@@ -2,14 +2,14 @@ const mongoose = require('mongoose')
 const validator = require('validator')
 const { mustBeFilled } = require('../helpers/mustBeFilled')
 const {
-  nameRU,
-  nameEn,
-  year,
-  country,
-  numberOfFigures,
-  currency,
-  description,
-  image,
+  NAME_RU,
+  NAME_EN,
+  YEAR,
+  COUNTRY,
+  NUMBER_OF_FIGURES,
+  CURRENCY,
+  DESCRIPTION,
+  IMAGE,
 } = require('../constants/seriesSchema')
 const { incorrectUrlImage } = require('../constants/errorMessage')
 const { EUR } = require('../constants/currency')
@@ -18,23 +18,23 @@ const figureSchema = require('./figure')
 const seriesSchema = new mongoose.Schema({
   nameRu: {
     type: String,
-    required: [true, mustBeFilled(nameRU)],
+    required: [true, mustBeFilled(NAME_RU)],
   },
   nameEn: {
     type: String,
-    required: [true, mustBeFilled(nameEn)],
+    required: [true, mustBeFilled(NAME_EN)],
   },
   year: {
     type: Number,
-    required: [true, mustBeFilled(year)],
+    required: [true, mustBeFilled(YEAR)],
   },
   country: {
     type: String,
-    required: [true, mustBeFilled(country)],
+    required: [true, mustBeFilled(COUNTRY)],
   },
   numberOfFigures: {
     type: String,
-    required: [true, mustBeFilled(numberOfFigures)],
+    required: [true, mustBeFilled(NUMBER_OF_FIGURES)],
   },
   costAmount: {
     amount: {
@@ -43,17 +43,17 @@ const seriesSchema = new mongoose.Schema({
     },
     currency: {
       type: String,
-      required: [true, currency],
+      required: [true, CURRENCY],
       default: EUR,
     },
   },
   description: {
     type: String,
-    required: [true, mustBeFilled(description)],
+    required: [true, mustBeFilled(DESCRIPTION)],
   },
   image: {
     type: String,
-    required: [true, mustBeFilled(image)],
+    required: [true, mustBeFilled(IMAGE)],
     validate: {
       validator: (v) => validator.isURL(v),
       message: incorrectUrlImage,

@@ -1,21 +1,19 @@
-const nameRU = '"nameRu"'
-const nameEn = '"nameEN"'
-const year = '"year"'
-const country = '"country"'
-const numberOfFigures = '"numberOfFigures"'
-const costAmount = '"cost amount"'
-const currency = '"currency"'
-const description = '"description"'
-const image = '"image"'
+const NAME_RU = '"nameRu"'
+const NAME_EN = '"nameEN"'
+const YEAR = '"year"'
+const COUNTRY = '"country"'
+const NUMBER_OF_FIGURES = '"numberOfFigures"'
+const CURRENCY = '"currency"'
+const DESCRIPTION = '"description"'
+const IMAGE = '"image"'
 
 module.exports = {
-  nameRU,
-  nameEn,
-  year,
-  country,
-  numberOfFigures,
-  costAmount,
-  currency,
-  description,
-  image,
+  NAME_RU,
+  NAME_EN,
+  YEAR,
+  COUNTRY,
+  NUMBER_OF_FIGURES,
+  CURRENCY,
+  DESCRIPTION,
+  IMAGE,
 }

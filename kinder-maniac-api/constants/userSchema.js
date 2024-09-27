@@ -1,5 +1,9 @@
-const nicknameText = '"nickname"'
-const emailText = '"email"'
-const passwordText = '"password"'
+const NICKNAME_TEXT = '"nickname"'
+const EMAIL_TEXT = '"email"'
+const PASSWORD_TEXT = '"password"'
 
-module.exports = { nicknameText, emailText, passwordText }
+module.exports = {
+  NICKNAME_TEXT,
+  EMAIL_TEXT,
+  PASSWORD_TEXT,
+}

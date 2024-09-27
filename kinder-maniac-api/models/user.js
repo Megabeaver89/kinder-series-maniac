@@ -3,40 +3,47 @@ const validator = require('validator')
 const bcrypt = require('bcryptjs')
 const { mustBeFilled } = require('../helpers/mustBeFilled')
 const UnauthorizedError = require('../errors/UnauthorizedError')
-const { nicknameText, emailText, passwordText } = require('../constants/userSchema')
-const { maxLengthField, minLengthField, lengthTwo, lengthThirty } = require('../constants/schema')
+const {
+  NICKNAME_TEXT,
+  EMAIL_TEXT,
+  PASSWORD_TEXT } = require('../constants/userSchema')
+const {
+  MIN_LENGTH_FIELD,
+  MAX_LENGTH_FIELD,
+  LENGTH_TWO,
+  LENGTH_THIRTY } = require('../constants/schema')
 const { insertErrorText } = require('../helpers/insertErrorText')
-const { incorrectEmail, incorreсtLoginOrPassword } = require('../constants/errorMessage')
+const { INCORRECT_EMAIL, INCORRECT_LOGIN_OR_PASSWORD } = require('../constants/errorMessage')
 
 const userSchema = new mongoose.Schema({
   nickname: {
     type: String,
-    required: [true, mustBeFilled(nicknameText)],
-    minlength: [2, insertErrorText(minLengthField, nicknameText, lengthTwo)],
-    maxlength: [30, insertErrorText(maxLengthField, nicknameText, lengthThirty)],
+    required: [true, mustBeFilled(NICKNAME_TEXT)],
+    minlength: [2, insertErrorText(MIN_LENGTH_FIELD, NICKNAME_TEXT, LENGTH_TWO)],
+    maxlength: [30, insertErrorText(MAX_LENGTH_FIELD, NICKNAME_TEXT, LENGTH_THIRTY)],
   },
   email: {
     type: String,
-    required: [true, mustBeFilled(emailText)],
+    required: [true, mustBeFilled(EMAIL_TEXT)],
     unique: true,
     validate: {
       validator: (v) => validator.isEmail(v),
-      message: incorrectEmail,
+      message: INCORRECT_EMAIL,
     },
   },
   password: {
     type: String,
-    required: [true, mustBeFilled(passwordText)],
+    required: [true, mustBeFilled(PASSWORD_TEXT)],
   },
 }, { versionKey: false })
 
 userSchema.statics.findUserByCredentials = function (email, password, next) {
   return this.findOne({ email }).select('+password')
-    .orFail(() => next(new UnauthorizedError(incorreсtLoginOrPassword)))
+    .orFail(() => next(new UnauthorizedError(INCORRECT_LOGIN_OR_PASSWORD)))
     .then((user) => bcrypt.compare(password, user.password)
       .then((matched) => {
         if (!matched) {
-          return next(new UnauthorizedError(incorreсtLoginOrPassword))
+          return next(new UnauthorizedError(INCORRECT_LOGIN_OR_PASSWORD))
         }
         return user
       }))

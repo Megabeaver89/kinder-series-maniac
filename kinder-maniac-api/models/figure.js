@@ -1,14 +1,14 @@
 const mongoose = require('mongoose')
 const validator = require('validator')
 const { mustBeFilled } = require('../helpers/mustBeFilled')
-const { incorrectUrlImage } = require('../constants/errorMessage')
+const { INCORRECT_URL_IMAGE } = require('../constants/errorMessage')
 const { EUR } = require('../constants/currency')
 const {
-  nameEn,
-  costAmount,
-  currency,
-  description,
-  image,
+  NAME_EN,
+  COST_AMOUNT,
+  CURRENCY,
+  DESCRIPTION,
+  IMAGE,
 } = require('../constants/figureSchema')
 
 const figureSchema = new mongoose.Schema({
@@ -17,7 +17,7 @@ const figureSchema = new mongoose.Schema({
   },
   nameEn: {
     type: String,
-    required: [true, mustBeFilled(nameEn)],
+    required: [true, mustBeFilled(NAME_EN)],
   },
   year: {
     type: Number,
@@ -28,24 +28,24 @@ const figureSchema = new mongoose.Schema({
   costAmount: {
     amount: {
       type: Number,
-      required: [true, mustBeFilled(costAmount)],
+      required: [true, mustBeFilled(COST_AMOUNT)],
     },
     currency: {
       type: String,
-      required: [true, currency],
+      required: [true, CURRENCY],
       default: EUR,
     },
   },
   description: {
     type: String,
-    required: [true, mustBeFilled(description)],
+    required: [true, mustBeFilled(DESCRIPTION)],
   },
   image: {
     type: String,
-    required: [true, mustBeFilled(image)],
+    required: [true, mustBeFilled(IMAGE)],
     validate: {
       validator: (v) => validator.isURL(v),
-      message: incorrectUrlImage,
+      message: INCORRECT_URL_IMAGE,
     },
   },
 })
