@@ -5,8 +5,16 @@ const ExistingEmailError = require('../errors/ExistingEmailError')
 const BadRequestError = require('../errors/BadRequestError')
 const NotFoundError = require('../errors/NotFoundError')
 const UnauthorizedError = require('../errors/UnauthorizedError')
-const { PASSWORD_REQUIRED, EXISTING_EMAIL, AUTHORIZATION_REQUIRED } = require('../constants/errorMessage')
-const { CREATED } = require('../constants/statusCodes')
+const {
+  OK,
+  CREATED,
+} = require('../constants/statusCodes')
+const {
+  PASSWORD_REQUIRED,
+  EXISTING_EMAIL,
+  AUTHORIZATION_REQUIRED,
+  USER_NOT_FOUND,
+} = require('../constants/errorMessage')
 const { MONGO_DUPLICATE_KEY_ERROR_CODE } = require('../constants/errorCodes')
 const { JWT_SECRET } = require('../config')
 const { USER_LOGGED_OUT_SUCCESS } = require('../constants/message')
@@ -67,4 +75,17 @@ const signoutUser = (req, res, next) => {
   } catch (err) {
     next(err)
   }
+}
+
+const returnEmailAndNameUser = (userData) => {
+  const { name, email } = userData
+  return { name, email }
+}
+
+const getUserInfo = (req, res, next) => {
+  const userId = req.iser._id
+  userModel.findById(userId)
+    .orFail(() => next(new NotFoundError(USER_NOT_FOUND)))
+    .then((user) => res.status(OK).send(returnEmailAndNameUser(user)))
+    .catch(next)
 }

@@ -6,6 +6,7 @@ const EXISTING_EMAIL = 'Пользователь с таким email уже су
 const AUTHORIZATION_REQUIRED = 'Необходима авторизация'
 const PAGE_NOT_FOUND = 'Запрашиваемая страница не найдена'
 const SERVER_ERROR = 'Ошибка сервера'
+const USER_NOT_FOUND = 'Пользователь c таким id не найден'
 
 module.exports = {
   INCORRECT_EMAIL,
@@ -16,4 +17,5 @@ module.exports = {
   AUTHORIZATION_REQUIRED,
   PAGE_NOT_FOUND,
   SERVER_ERROR,
+  USER_NOT_FOUND,
 }

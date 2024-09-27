@@ -11,7 +11,7 @@ const {
   DESCRIPTION,
   IMAGE,
 } = require('../constants/seriesSchema')
-const { incorrectUrlImage } = require('../constants/errorMessage')
+const { INCORRECT_URL_IMAGE } = require('../constants/errorMessage')
 const { EUR } = require('../constants/currency')
 const figureSchema = require('./figure')
 
@@ -56,7 +56,7 @@ const seriesSchema = new mongoose.Schema({
     required: [true, mustBeFilled(IMAGE)],
     validate: {
       validator: (v) => validator.isURL(v),
-      message: incorrectUrlImage,
+      message: INCORRECT_URL_IMAGE,
     },
   },
   figures: [figureSchema],
