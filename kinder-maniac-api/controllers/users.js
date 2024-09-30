@@ -89,3 +89,36 @@ const getUserInfo = (req, res, next) => {
     .then((user) => res.status(OK).send(returnEmailAndNameUser(user)))
     .catch(next)
 }
+
+const updateUser = (req, res, next, data) => {
+  const updateObject = { ...data }
+
+  userModel.findOne({ email: updateObject.email })
+    .then((existingUser) => {
+      if (existingUser && existingUser.id !== req.user._id) {
+        return next(new ExistingEmailError(EXISTING_EMAIL))
+      }
+      return userModel.findByIdAndUpdate(
+        req.user._id,
+        updateObject,
+        { new: true, runValidators: true },
+      )
+        .orFail(() => next(new NotFoundError(USER_NOT_FOUND)))
+        .then((user) => res.status(OK).send(returnEmailAndNameUser(user)))
+        .catch(next)
+    })
+    .catch(next)
+}
+
+const editUserInfo = (req, res, next) => {
+  const { name, email } = req.body
+  updateUser(req, res, next, { name, email })
+}
+
+module.exports = {
+  getUserInfo,
+  createUser,
+  editUserInfo,
+  loginUser,
+  signoutUser,
+}
