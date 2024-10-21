@@ -6,6 +6,7 @@ const NUMBER_OF_FIGURES = '"numberOfFigures"'
 const CURRENCY = '"currency"'
 const DESCRIPTION = '"description"'
 const IMAGE = '"image"'
+const SERIES_ID = '"seriesId"'
 
 module.exports = {
   NAME_RU,
@@ -16,4 +17,5 @@ module.exports = {
   CURRENCY,
   DESCRIPTION,
   IMAGE,
+  SERIES_ID,
 }

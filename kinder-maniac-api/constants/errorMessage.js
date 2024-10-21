@@ -7,6 +7,8 @@ const AUTHORIZATION_REQUIRED = 'Необходима авторизация'
 const PAGE_NOT_FOUND = 'Запрашиваемая страница не найдена'
 const SERVER_ERROR = 'Ошибка сервера'
 const USER_NOT_FOUND = 'Пользователь c таким id не найден'
+const SERIES_NOT_FOUND = 'Серия с таким id не найдена'
+const SERIES_CANNOT_DELETE_NOT_ADDED = 'Нельзя удалить серию, если вы ее не добавляли'
 
 module.exports = {
   INCORRECT_EMAIL,
@@ -18,4 +20,6 @@ module.exports = {
   PAGE_NOT_FOUND,
   SERVER_ERROR,
   USER_NOT_FOUND,
+  SERIES_NOT_FOUND,
+  SERIES_CANNOT_DELETE_NOT_ADDED
 }

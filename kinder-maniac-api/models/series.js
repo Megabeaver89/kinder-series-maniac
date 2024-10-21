@@ -10,12 +10,17 @@ const {
   CURRENCY,
   DESCRIPTION,
   IMAGE,
+  SERIES_ID,
 } = require('../constants/seriesSchema')
 const { INCORRECT_URL_IMAGE } = require('../constants/errorMessage')
 const { EUR } = require('../constants/currency')
 const figureSchema = require('./figure')
 
 const seriesSchema = new mongoose.Schema({
+  seriesId: {
+    type: String,
+    required: [true, mustBeFilled(SERIES_ID)]
+  },
   nameRu: {
     type: String,
     required: [true, mustBeFilled(NAME_RU)],
