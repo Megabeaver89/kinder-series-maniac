@@ -17,7 +17,7 @@ const {
 } = require('../constants/errorMessage')
 const { MONGO_DUPLICATE_KEY_ERROR_CODE } = require('../constants/errorCodes')
 const { JWT_SECRET } = require('../config')
-const { USER_LOGGED_OUT_SUCCESS } = require('../constants/message')
+const { USER_LOGGED_OUT_SUCCESS, USER_DELETED_SUCCESS } = require('../constants/message')
 const { JWT_COOKIE_MAX_AGE, JWT_COOKIE_NAME, JWT_EXPIRATION } = require('../constants/cookieConfig')
 
 const createUser = (req, res, next) => {
@@ -83,7 +83,7 @@ const returnEmailAndNameUser = (userData) => {
 }
 
 const getUserInfo = (req, res, next) => {
-  const userId = req.iser._id
+  const userId = req.user._id
   userModel.findById(userId)
     .orFail(() => next(new NotFoundError(USER_NOT_FOUND)))
     .then((user) => res.status(OK).send(returnEmailAndNameUser(user)))
@@ -115,10 +115,23 @@ const editUserInfo = (req, res, next) => {
   updateUser(req, res, next, { name, email })
 }
 
+const deleteUser = (req, res, next) => {
+  const userId = req.user._id
+  userModel.findByIdAndDelete(userId)
+    .orFail(() => new NotFoundError(USER_NOT_FOUND))
+    .then((userDeleted) => res.status(OK)
+      .send({
+        user: returnEmailAndNameUser(userDeleted),
+        message: USER_DELETED_SUCCESS,
+      }))
+    .catch(next)
+}
+
 module.exports = {
   getUserInfo,
   createUser,
   editUserInfo,
   loginUser,
   signoutUser,
+  deleteUser,
 }
