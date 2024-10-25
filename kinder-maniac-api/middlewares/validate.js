@@ -1,10 +1,9 @@
 const { celebrate, Joi } = require('celebrate')
-const mongoose = require('mongoose')
-const { regexForLink } = require('../constants/regex')
+// const { regexForLink } = require('../constants/regex')
 
 const validateUserBodyForSignUp = celebrate({
   body: Joi.object({
-    nickName: Joi
+    nickname: Joi
       .string()
       .min(2)
       .max(30),
@@ -73,6 +72,4 @@ module.exports = {
   validateUserBodyForPatchUserInfo,
   validateUserBodyForSignUp,
   validateUserBodyForSignIn,
-  validateMovieBodyForPost,
-  validateMovieParams,
 }

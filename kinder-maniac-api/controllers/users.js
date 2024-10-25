@@ -15,7 +15,7 @@ const {
   AUTHORIZATION_REQUIRED,
   USER_NOT_FOUND,
 } = require('../constants/errorMessage')
-const { MONGO_DUPLICATE_KEY_ERROR_CODE } = require('../constants/errorCodes')
+const { MONGO_DUPLICATE_KEY_ERROR_CODE } = require('../constants/errorCodesDataBase')
 const { JWT_SECRET } = require('../config')
 const { USER_LOGGED_OUT_SUCCESS, USER_DELETED_SUCCESS } = require('../constants/message')
 const { JWT_COOKIE_MAX_AGE, JWT_COOKIE_NAME, JWT_EXPIRATION } = require('../constants/cookieConfig')
@@ -78,8 +78,8 @@ const signoutUser = (req, res, next) => {
 }
 
 const returnEmailAndNameUser = (userData) => {
-  const { name, email } = userData
-  return { name, email }
+  const { nickname, email } = userData
+  return { nickname, email }
 }
 
 const getUserInfo = (req, res, next) => {

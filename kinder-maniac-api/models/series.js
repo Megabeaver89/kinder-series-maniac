@@ -19,7 +19,7 @@ const figureSchema = require('./figure')
 const seriesSchema = new mongoose.Schema({
   seriesId: {
     type: String,
-    required: [true, mustBeFilled(SERIES_ID)]
+    required: [true, mustBeFilled(SERIES_ID)],
   },
   nameRu: {
     type: String,

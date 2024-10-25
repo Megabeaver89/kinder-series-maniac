@@ -9,14 +9,11 @@ const router = require('./routes')
 const NotFoundError = require('./errors/NotFoundError')
 const { pageNotFound } = require('./constants/errorMessage')
 const handlerError = require('./middlewares/handlerError')
-
 const rateLimiter = require('./middlewares/rateLimiter')
 const { requestLogger, errorLogger } = require('./middlewares/logger')
 
 mongoose.connect(DB_ADDRESS, {
   useNewUrlParser: true,
-  useCreateIndex: true,
-  useFindAndModify: false,
 })
 const app = express()
 app.use(cors())
