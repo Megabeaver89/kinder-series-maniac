@@ -34,10 +34,23 @@ const validateUserBodyForPatchUserInfo = celebrate({
     nickname: Joi
       .string()
       .min(2)
-      .max(30),
+      .max(30)
+      .required(),
     email: Joi
       .string()
-      .email(),
+      .email()
+      .required(),
+  }),
+})
+
+const validateUserBodyForPatchUserPassword = celebrate({
+  body: Joi.object({
+    newPassword: Joi
+      .string()
+      .required(),
+    passwordRepeat: Joi
+      .string()
+      .required(),
   }),
 })
 
@@ -72,4 +85,5 @@ module.exports = {
   validateUserBodyForPatchUserInfo,
   validateUserBodyForSignUp,
   validateUserBodyForSignIn,
+  validateUserBodyForPatchUserPassword,
 }
