@@ -17,6 +17,7 @@ const {
   NEW_NICKNAME_SAME_OLD,
   PASSWORDS_NOT_THE_SAME,
   PASSWORDS_MUST_BE_NOT_EMPTY,
+  PASSWORDS_SIMILAR,
 } = require('../constants/errorMessage')
 const { MONGO_DUPLICATE_KEY_ERROR_CODE } = require('../constants/errorCodesDataBase')
 const { JWT_SECRET } = require('../config')
@@ -152,17 +153,28 @@ const editUserPassword = (req, res, next) => {
     return next(new BadRequestError(PASSWORDS_NOT_THE_SAME))
   }
 
-  bcrypt.hash(newPassword, 10)
+  userModel.findById(req.user._id).select('+password')
+    .then((user) => {
+      if (!user) {
+        return next(new NotFoundError(USER_NOT_FOUND))
+      }
+      return bcrypt.compare(newPassword, user.password)
+        .then((matched) => {
+          if (matched) {
+            return next(new BadRequestError(PASSWORDS_SIMILAR))
+          }
+          return bcrypt.hash(newPassword, 10)
+        })
+    })
+
     .then((hash) => userModel.findByIdAndUpdate(
       req.user._id,
       { password: hash },
       { new: true, runValidators: true },
     ))
-    .then(() => res.status(OK).send(
-      {
-        message: PASSWORD_CHANGED_SUCCESS,
-      },
-    ))
+    .then(() => res.status(OK).send({
+      message: PASSWORD_CHANGED_SUCCESS,
+    }))
     .catch(next)
 }
 

@@ -12,6 +12,7 @@ const SERIES_NOT_FOUND = 'Серия с таким id не найдена'
 const SERIES_CANNOT_DELETE_NOT_ADDED = 'Нельзя удалить серию, если вы ее не добавляли'
 const PASSWORDS_NOT_THE_SAME = 'Пароли не совпадают'
 const PASSWORDS_MUST_BE_NOT_EMPTY = 'Пароли не могут быть пустыми'
+const PASSWORDS_SIMILAR = 'Новый пароль должен отличаться от старого'
 
 module.exports = {
   INCORRECT_EMAIL,
@@ -28,4 +29,5 @@ module.exports = {
   SERIES_CANNOT_DELETE_NOT_ADDED,
   PASSWORDS_NOT_THE_SAME,
   PASSWORDS_MUST_BE_NOT_EMPTY,
+  PASSWORDS_SIMILAR,
 }
