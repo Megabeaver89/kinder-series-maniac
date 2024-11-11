@@ -24,6 +24,7 @@ const { JWT_SECRET } = require('../config')
 const { USER_LOGGED_OUT_SUCCESS, USER_DELETED_SUCCESS, PASSWORD_CHANGED_SUCCESS } = require('../constants/message')
 const { JWT_COOKIE_MAX_AGE, JWT_COOKIE_NAME, JWT_EXPIRATION } = require('../constants/cookieConfig')
 const NoChangesError = require('../errors/NoChangesError')
+const sendEmail = require('../services/emailService')
 
 const createUser = (req, res, next) => {
   const { nickname, email, password } = req.body
@@ -44,6 +45,7 @@ const createUser = (req, res, next) => {
         nickname: newUser.nickname,
         email: newUser.email,
       })
+      sendEmail(newUser.email, 'registration', 'поздравляем вы успешно зарегались', '<b>поздравляем вы успешно зарега</b>')
     })
     .catch((err) => {
       if (err.code === MONGO_DUPLICATE_KEY_ERROR_CODE) {
