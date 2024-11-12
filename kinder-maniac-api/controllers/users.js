@@ -24,7 +24,8 @@ const { JWT_SECRET } = require('../config')
 const { USER_LOGGED_OUT_SUCCESS, USER_DELETED_SUCCESS, PASSWORD_CHANGED_SUCCESS } = require('../constants/message')
 const { JWT_COOKIE_MAX_AGE, JWT_COOKIE_NAME, JWT_EXPIRATION } = require('../constants/cookieConfig')
 const NoChangesError = require('../errors/NoChangesError')
-const sendEmail = require('../services/emailService')
+const { sendEmailRegistrationSuccess, sendEmailPasswordChangedSuccess } = require('../services/emailService')
+const { hashPassword } = require('../utils/passwordUtils')
 
 const createUser = (req, res, next) => {
   const { nickname, email, password } = req.body
@@ -33,7 +34,7 @@ const createUser = (req, res, next) => {
     return next(new BadRequestError(PASSWORD_REQUIRED))
   }
 
-  bcrypt.hash(password, 10)
+  hashPassword(password)
     .then((hash) => userModel.create({
       nickname,
       email,
@@ -45,8 +46,8 @@ const createUser = (req, res, next) => {
         nickname: newUser.nickname,
         email: newUser.email,
       })
-      sendEmail(newUser.email, 'registration', 'поздравляем вы успешно зарегались', '<b>поздравляем вы успешно зарега</b>')
     })
+    .then(() => sendEmailRegistrationSuccess(email))
     .catch((err) => {
       if (err.code === MONGO_DUPLICATE_KEY_ERROR_CODE) {
         return next(new ExistingEmailError(EXISTING_EMAIL))
@@ -154,29 +155,29 @@ const editUserPassword = (req, res, next) => {
   if (newPassword !== passwordRepeat) {
     return next(new BadRequestError(PASSWORDS_NOT_THE_SAME))
   }
-
   userModel.findById(req.user._id).select('+password')
     .then((user) => {
       if (!user) {
         return next(new NotFoundError(USER_NOT_FOUND))
       }
+      const userEmail = user.email
       return bcrypt.compare(newPassword, user.password)
         .then((matched) => {
           if (matched) {
             return next(new BadRequestError(PASSWORDS_SIMILAR))
           }
-          return bcrypt.hash(newPassword, 10)
+          return hashPassword(newPassword)
         })
+        .then((hash) => userModel.findByIdAndUpdate(
+          req.user._id,
+          { password: hash },
+          { new: true, runValidators: true },
+        ))
+        .then(() => res.status(OK).send({
+          message: PASSWORD_CHANGED_SUCCESS,
+        }))
+        .then(() => sendEmailPasswordChangedSuccess(userEmail))
     })
-
-    .then((hash) => userModel.findByIdAndUpdate(
-      req.user._id,
-      { password: hash },
-      { new: true, runValidators: true },
-    ))
-    .then(() => res.status(OK).send({
-      message: PASSWORD_CHANGED_SUCCESS,
-    }))
     .catch(next)
 }
 

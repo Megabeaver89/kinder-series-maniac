@@ -1,5 +1,6 @@
 const nodemailer = require('nodemailer')
 const { EMAIL, EMAIL_PASS } = require('../config')
+const { REGISTRATION_SUCCESS, PASSWORD_CHANGED_SUCCESS, PASSWORD_RESET } = require('../constants/emailMessage')
 
 const transporter = nodemailer.createTransport({
   host: 'smtp.ethereal.email',
@@ -15,13 +16,12 @@ const transporter = nodemailer.createTransport({
 const sendEmail = async (userEmail, subject, text, html) => {
   try {
     const info = await transporter.sendMail({
-      from: `"Test Sender" <${EMAIL}>`, // Адрес отправителя
-      to: `${userEmail}`, // Адрес получателя
+      from: `<${EMAIL}>`,
+      to: `${userEmail}`,
       subject,
       text,
       html,
     })
-
     console.log("Сообщение отправлено: %s", info.messageId)
     console.log("Предварительный просмотр URL: %s", nodemailer.getTestMessageUrl(info))
   } catch (error) {
@@ -29,4 +29,34 @@ const sendEmail = async (userEmail, subject, text, html) => {
   }
 }
 
-module.exports = sendEmail
+const sendEmailRegistrationSuccess = (userEmail) => {
+  sendEmail(
+    userEmail,
+    REGISTRATION_SUCCESS.subject,
+    REGISTRATION_SUCCESS.text,
+    REGISTRATION_SUCCESS.html,
+  )
+}
+
+const sendEmailPasswordChangedSuccess = (userEmail) => {
+  sendEmail(
+    userEmail,
+    PASSWORD_CHANGED_SUCCESS.subject,
+    PASSWORD_CHANGED_SUCCESS.text,
+    PASSWORD_CHANGED_SUCCESS.html,
+  )
+}
+
+const sendEmailPassswordReset = (userEmail) => {
+  sendEmail(
+    userEmail,
+    PASSWORD_RESET.subject,
+    PASSWORD_RESET.text,
+    PASSWORD_RESET.html,
+  )
+}
+module.exports = {
+  sendEmailRegistrationSuccess,
+  sendEmailPasswordChangedSuccess,
+  sendEmailPassswordReset,
+}
