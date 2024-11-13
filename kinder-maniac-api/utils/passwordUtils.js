@@ -1,10 +1,7 @@
 const bcrypt = require('bcryptjs')
 const { SALT_ROUNDS_TEN } = require('../constants/saltRoundsForHash')
 
-const hashPassword = async (password) => {
-  const saltRounds = SALT_ROUNDS_TEN
-  return bcrypt.hash(password, saltRounds)
-}
+const hashPassword = async (password) => bcrypt.hash(password, SALT_ROUNDS_TEN)
 
 const comparePassword = async (password, hash) => bcrypt.compare(password, hash)
 

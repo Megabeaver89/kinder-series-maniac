@@ -29,8 +29,8 @@ const sendEmail = async (userEmail, subject, text, html) => {
   }
 }
 
-const sendEmailRegistrationSuccess = (userEmail) => {
-  sendEmail(
+const sendEmailRegistrationSuccess = async (userEmail) => {
+  await sendEmail(
     userEmail,
     REGISTRATION_SUCCESS.subject,
     REGISTRATION_SUCCESS.text,
@@ -38,8 +38,8 @@ const sendEmailRegistrationSuccess = (userEmail) => {
   )
 }
 
-const sendEmailPasswordChangedSuccess = (userEmail) => {
-  sendEmail(
+const sendEmailPasswordChangedSuccess = async (userEmail) => {
+  await sendEmail(
     userEmail,
     PASSWORD_CHANGED_SUCCESS.subject,
     PASSWORD_CHANGED_SUCCESS.text,
@@ -47,8 +47,8 @@ const sendEmailPasswordChangedSuccess = (userEmail) => {
   )
 }
 
-const sendEmailPassswordReset = (userEmail) => {
-  sendEmail(
+const sendEmailPassswordReset = async (userEmail) => {
+  await sendEmail(
     userEmail,
     PASSWORD_RESET.subject,
     PASSWORD_RESET.text,

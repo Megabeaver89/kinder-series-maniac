@@ -1,4 +1,4 @@
-const generateEmailHtml = require('../utils/emailHtmlGenerater')
+const generateEmailHtml = require('../utils/generateEmailHtml')
 
 const REGISTRATION_SUCCESS = {
   subject: 'Успешная регистрация на сайте!',

@@ -35,6 +35,14 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: [true, mustBeFilled(PASSWORD_TEXT)],
   },
+  passwordResetToken: {
+    type: String,
+    default: null,
+  },
+  passwordResetExpires: {
+    type: Date,
+    default: null,
+  },
 }, { versionKey: false })
 
 userSchema.statics.findUserByCredentials = function (email, password, next) {

@@ -1,5 +1,4 @@
 const bcrypt = require('bcryptjs')
-const jwt = require('jsonwebtoken')
 const userModel = require('../models/user')
 const ExistingEmailError = require('../errors/ExistingEmailError')
 const BadRequestError = require('../errors/BadRequestError')
@@ -20,60 +19,55 @@ const {
   PASSWORDS_SIMILAR,
 } = require('../constants/errorMessage')
 const { MONGO_DUPLICATE_KEY_ERROR_CODE } = require('../constants/errorCodesDataBase')
-const { JWT_SECRET } = require('../config')
 const { USER_LOGGED_OUT_SUCCESS, USER_DELETED_SUCCESS, PASSWORD_CHANGED_SUCCESS } = require('../constants/message')
-const { JWT_COOKIE_MAX_AGE, JWT_COOKIE_NAME, JWT_EXPIRATION } = require('../constants/cookieConfig')
+const { JWT_COOKIE_MAX_AGE, JWT_COOKIE_NAME } = require('../constants/cookieConfig')
 const NoChangesError = require('../errors/NoChangesError')
-const { sendEmailRegistrationSuccess, sendEmailPasswordChangedSuccess } = require('../services/emailService')
+const { sendEmailRegistrationSuccess, sendEmailPasswordChangedSuccess, sendEmailPassswordReset } = require('../services/emailService')
 const { hashPassword } = require('../utils/passwordUtils')
+const generateJwtToken = require('../utils/generateJwtToken')
+const { JWT_TOKEN_TYPE_RESET_PASSWORD } = require('../constants/jwtConfig')
 
-const createUser = (req, res, next) => {
+const createUser = async (req, res, next) => {
   const { nickname, email, password } = req.body
-
-  if (!password) {
-    return next(new BadRequestError(PASSWORD_REQUIRED))
-  }
-
-  hashPassword(password)
-    .then((hash) => userModel.create({
+  try {
+    if (!password) {
+      return next(new BadRequestError(PASSWORD_REQUIRED))
+    }
+    const hash = await hashPassword(password)
+    const newUser = await userModel.create({
       nickname,
       email,
       password: hash,
-    }))
-    .then((newUser) => {
-      res.status(CREATED).send({
-        _id: newUser._id,
-        nickname: newUser.nickname,
-        email: newUser.email,
-      })
     })
-    .then(() => sendEmailRegistrationSuccess(email))
-    .catch((err) => {
-      if (err.code === MONGO_DUPLICATE_KEY_ERROR_CODE) {
-        return next(new ExistingEmailError(EXISTING_EMAIL))
-      }
-      next(err)
+    await sendEmailRegistrationSuccess(email)
+    res.status(CREATED).send({
+      _id: newUser._id,
+      nickname: newUser.nickname,
+      email: newUser.email,
     })
+  } catch (err) {
+    if (err.code === MONGO_DUPLICATE_KEY_ERROR_CODE) {
+      return next(new ExistingEmailError(EXISTING_EMAIL))
+    }
+    next(err)
+  }
 }
 
-const loginUser = (req, res, next) => {
+const loginUser = async (req, res, next) => {
   const { email, password } = req.body
-  userModel.findUserByCredentials(email, password, next)
-    .then((user) => {
-      const token = jwt.sign(
-        { _id: user._id },
-        JWT_SECRET,
-        { expiresIn: JWT_EXPIRATION },
-      )
-      res.cookie(JWT_COOKIE_NAME, token, {
-        maxAge: JWT_COOKIE_MAX_AGE,
-        httpOnly: true,
-        sameSite: true,
-        secure: true,
-      })
-        .send({ token })
+  try {
+    const user = await userModel.findUserByCredentials({ email, password, next })
+    const token = generateJwtToken(user._id)
+    res.cookie(JWT_COOKIE_NAME, token, {
+      maxAge: JWT_COOKIE_MAX_AGE,
+      httpOnly: true,
+      sameSite: true,
+      secure: true,
     })
-    .catch(next)
+    res.send({ token })
+  } catch (err) {
+    next(err)
+  }
 }
 
 const signoutUser = (req, res, next) => {
@@ -93,61 +87,72 @@ const returnEmailAndNicknameUser = (userData) => {
   return { nickname, email }
 }
 
-const getUserInfo = (req, res, next) => {
+const getUserInfo = async (req, res, next) => {
   const userId = req.user._id
-  userModel.findById(userId)
-    .orFail(() => next(new NotFoundError(USER_NOT_FOUND)))
-    .then((user) => res.status(OK).send(returnEmailAndNicknameUser(user)))
-    .catch(next)
+  try {
+    const user = await userModel.findById(userId)
+    if (!user) {
+      return next(new NotFoundError(USER_NOT_FOUND))
+    }
+    res.status(OK).send(returnEmailAndNicknameUser(user))
+  } catch (err) {
+    next(err)
+  }
 }
 
-const updateUser = (req, res, next, data) => {
+const updateUser = async (req, res, next, data) => {
   const updateObject = { ...data }
-
-  userModel.findOne({ email: updateObject.email })
-    .then((existingUser) => {
-      if (existingUser) {
-        if (existingUser.id !== req.user._id) {
-          return next(new ExistingEmailError(EXISTING_EMAIL))
-        }
-        if (
-          existingUser.email === updateObject.email
-          && existingUser.nickname === updateObject.nickname
-        ) {
-          return next(new NoChangesError(NEW_NICKNAME_SAME_OLD))
-        }
+  try {
+    const existingUser = await userModel.findOne({ email: updateObject.email })
+    if (existingUser) {
+      if (existingUser.id !== req.user._id) {
+        return next(new ExistingEmailError(EXISTING_EMAIL))
       }
+      if (
+        existingUser.email === updateObject.email
+        && existingUser.nickname === updateObject.nickname
+      ) {
+        return next(new NoChangesError(NEW_NICKNAME_SAME_OLD))
+      }
+    }
 
-      return userModel.findByIdAndUpdate(
-        req.user._id,
-        updateObject,
-        { new: true, runValidators: true },
-      )
-        .orFail(() => next(new NotFoundError(USER_NOT_FOUND)))
-        .then((user) => res.status(OK).send(returnEmailAndNicknameUser(user)))
-        .catch(next)
-    })
-    .catch(next)
+    const updatingUser = await userModel.findByIdAndUpdate(
+      req.user._id,
+      updateObject,
+      { new: true, runValidators: true },
+    )
+    if (!updatingUser) {
+      return next(new NotFoundError(USER_NOT_FOUND))
+    }
+    res.status(OK).send(returnEmailAndNicknameUser(updatingUser))
+  } catch (err) {
+    next(err)
+  }
 }
 
-const editUserInfo = (req, res, next) => {
+const editUserInfo = async (req, res, next) => {
   const { nickname, email } = req.body
-  updateUser(req, res, next, { nickname, email })
+  await updateUser(req, res, next, { nickname, email })
 }
 
-const deleteUser = (req, res, next) => {
+const deleteUser = async (req, res, next) => {
   const userId = req.user._id
-  userModel.findByIdAndDelete(userId)
-    .orFail(() => new NotFoundError(USER_NOT_FOUND))
-    .then((userDeleted) => res.status(OK)
+  try {
+    const deletingUser = await userModel.findByIdAndDelete(userId)
+    if (!deletingUser) {
+      return next(new NotFoundError(USER_NOT_FOUND))
+    }
+    res.status(OK)
       .send({
-        user: returnEmailAndNicknameUser(userDeleted),
+        user: returnEmailAndNicknameUser(deletingUser),
         message: USER_DELETED_SUCCESS,
-      }))
-    .catch(next)
+      })
+  } catch (err) {
+    next(err)
+  }
 }
 
-const editUserPassword = (req, res, next) => {
+const editUserPassword = async (req, res, next) => {
   const { newPassword, passwordRepeat } = req.body
   if (!newPassword || !passwordRepeat) {
     return next(new BadRequestError(PASSWORDS_MUST_BE_NOT_EMPTY))
@@ -155,30 +160,52 @@ const editUserPassword = (req, res, next) => {
   if (newPassword !== passwordRepeat) {
     return next(new BadRequestError(PASSWORDS_NOT_THE_SAME))
   }
-  userModel.findById(req.user._id).select('+password')
-    .then((user) => {
-      if (!user) {
-        return next(new NotFoundError(USER_NOT_FOUND))
-      }
-      const userEmail = user.email
-      return bcrypt.compare(newPassword, user.password)
-        .then((matched) => {
-          if (matched) {
-            return next(new BadRequestError(PASSWORDS_SIMILAR))
-          }
-          return hashPassword(newPassword)
-        })
-        .then((hash) => userModel.findByIdAndUpdate(
-          req.user._id,
-          { password: hash },
-          { new: true, runValidators: true },
-        ))
-        .then(() => res.status(OK).send({
-          message: PASSWORD_CHANGED_SUCCESS,
-        }))
-        .then(() => sendEmailPasswordChangedSuccess(userEmail))
-    })
-    .catch(next)
+  try {
+    const user = await userModel.findById(req.user._id).select('+password')
+    if (!user) {
+      return next(new NotFoundError(USER_NOT_FOUND))
+    }
+    const userEmail = user.email
+    const isMatch = await bcrypt.compare(newPassword, user.password)
+    if (isMatch) {
+      return next(new BadRequestError(PASSWORDS_SIMILAR))
+    }
+    const hash = await hashPassword(newPassword)
+    await userModel.findByIdAndUpdate(
+      req.user._id,
+      { password: hash },
+      { new: true, runValidators: true },
+    )
+    await sendEmailPasswordChangedSuccess(userEmail)
+    res.status(OK)
+      .send({ message: PASSWORD_CHANGED_SUCCESS })
+  } catch (err) {
+    next(err)
+  }
+}
+
+const forgotPassword = async (req, res, next) => {
+  const { email } = req.body
+  try {
+    const user = await userModel.findOne({ email })
+    if (!user) {
+      return next(new NotFoundError(USER_NOT_FOUND))
+    }
+    const resetToken = generateJwtToken(user.email, JWT_TOKEN_TYPE_RESET_PASSWORD)
+    const tokenExpires = Date.now() + 3600000
+    await userModel.findByIdAndUpdate(
+      user._id,
+      {
+        passwordResetToken: resetToken,
+        passwordResetExpires: tokenExpires,
+      },
+      { new: true },
+    )
+    await sendEmailPassswordReset(user.email, `https://yourapp.com/reset-password?token=${resetToken}`)
+    res.status(OK).send({ message: 'Ссылка для сброса пароля отправлена на вашу почту.' })
+  } catch (err) {
+    next(err)
+  }
 }
 
 module.exports = {
@@ -189,4 +216,5 @@ module.exports = {
   signoutUser,
   deleteUser,
   editUserPassword,
+  forgotPassword,
 }
