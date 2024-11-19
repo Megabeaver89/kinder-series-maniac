@@ -54,6 +54,15 @@ const validateUserBodyForPatchUserPassword = celebrate({
   }),
 })
 
+const validateUserBodyForForgotPassword = celebrate({
+  body: Joi.object({
+    email: Joi
+      .string()
+      .email()
+      .required(),
+  }),
+})
+
 // const validateMovieBodyForPost = celebrate({
 //   body: Joi.object().keys({
 //     country: Joi.string().required(),
@@ -86,4 +95,5 @@ module.exports = {
   validateUserBodyForSignUp,
   validateUserBodyForSignIn,
   validateUserBodyForPatchUserPassword,
+  validateUserBodyForForgotPassword,
 }

@@ -19,7 +19,7 @@ const {
   PASSWORDS_SIMILAR,
 } = require('../constants/errorMessage')
 const { MONGO_DUPLICATE_KEY_ERROR_CODE } = require('../constants/errorCodesDataBase')
-const { USER_LOGGED_OUT_SUCCESS, USER_DELETED_SUCCESS, PASSWORD_CHANGED_SUCCESS } = require('../constants/message')
+const { USER_LOGGED_OUT_SUCCESS, USER_DELETED_SUCCESS, PASSWORD_CHANGED_SUCCESS, RESET_LINK_TO_EMAIL } = require('../constants/message')
 const { JWT_COOKIE_MAX_AGE, JWT_COOKIE_NAME } = require('../constants/cookieConfig')
 const NoChangesError = require('../errors/NoChangesError')
 const { sendEmailRegistrationSuccess, sendEmailPasswordChangedSuccess, sendEmailPassswordReset } = require('../services/emailService')
@@ -152,31 +152,45 @@ const deleteUser = async (req, res, next) => {
   }
 }
 
-const editUserPassword = async (req, res, next) => {
-  const { newPassword, passwordRepeat } = req.body
+const updatePassword = async (userId, newPassword) => {
+  const hash = await hashPassword(newPassword)
+  const updatedUser = await userModel.findByIdAndUpdate(
+    userId,
+    { password: hash },
+    { new: true, runValidators: true },
+  )
+  if (!updatedUser) {
+    throw new NotFoundError(USER_NOT_FOUND)
+  }
+  return updateUser
+}
+
+const checkPasswords = (newPassword, passwordRepeat) => {
   if (!newPassword || !passwordRepeat) {
-    return next(new BadRequestError(PASSWORDS_MUST_BE_NOT_EMPTY))
+    throw new BadRequestError(PASSWORDS_MUST_BE_NOT_EMPTY)
   }
   if (newPassword !== passwordRepeat) {
-    return next(new BadRequestError(PASSWORDS_NOT_THE_SAME))
+    throw new BadRequestError(PASSWORDS_NOT_THE_SAME)
   }
+}
+
+const editUserPassword = async (req, res, next) => {
+  const { newPassword, passwordRepeat } = req.body
   try {
+    checkPasswords(newPassword, passwordRepeat)
+
     const user = await userModel.findById(req.user._id).select('+password')
     if (!user) {
       return next(new NotFoundError(USER_NOT_FOUND))
     }
-    const userEmail = user.email
     const isMatch = await bcrypt.compare(newPassword, user.password)
     if (isMatch) {
       return next(new BadRequestError(PASSWORDS_SIMILAR))
     }
-    const hash = await hashPassword(newPassword)
-    await userModel.findByIdAndUpdate(
-      req.user._id,
-      { password: hash },
-      { new: true, runValidators: true },
-    )
-    await sendEmailPasswordChangedSuccess(userEmail)
+
+    const updatedUser = await updatePassword(req.user._id, newPassword)
+
+    await sendEmailPasswordChangedSuccess(updatedUser.email)
     res.status(OK)
       .send({ message: PASSWORD_CHANGED_SUCCESS })
   } catch (err) {
@@ -202,10 +216,21 @@ const forgotPassword = async (req, res, next) => {
       { new: true },
     )
     await sendEmailPassswordReset(user.email, `https://yourapp.com/reset-password?token=${resetToken}`)
-    res.status(OK).send({ message: 'Ссылка для сброса пароля отправлена на вашу почту.' })
+    res.status(OK).send({ message: RESET_LINK_TO_EMAIL })
   } catch (err) {
     next(err)
   }
+}
+
+const resetPassword = async (req, res, next) => {
+  const { token, newPassword, passwordRepeat } = req.body
+  try {
+    checkPasswords(newPassword, passwordRepeat)
+    const decoded = verifyJwtToken(token, JWT_TOKEN_TYPE_RESET_PASSWORD)
+  } catch (error) {
+
+  }
+
 }
 
 module.exports = {

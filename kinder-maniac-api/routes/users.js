@@ -1,7 +1,13 @@
 const router = require('express').Router()
 const auth = require('../middlewares/auth')
 const userController = require('../controllers/users')
-const { validateUserBodyForPatchUserInfo, validateUserBodyForPatchUserPassword } = require('../middlewares/validate')
+const {
+  validateUserBodyForPatchUserInfo,
+  validateUserBodyForPatchUserPassword,
+  validateUserBodyForForgotPassword,
+} = require('../middlewares/validate')
+
+router.post('/forgot-password', validateUserBodyForForgotPassword, userController.forgotPassword)
 
 router.use(auth)
 
