@@ -17,6 +17,8 @@ const {
   PASSWORDS_NOT_THE_SAME,
   PASSWORDS_MUST_BE_NOT_EMPTY,
   PASSWORDS_SIMILAR,
+  INVALID_TOKEN,
+  TOKEN_EXPIRED,
 } = require('../constants/errorMessage')
 const { MONGO_DUPLICATE_KEY_ERROR_CODE } = require('../constants/errorCodesDataBase')
 const { USER_LOGGED_OUT_SUCCESS, USER_DELETED_SUCCESS, PASSWORD_CHANGED_SUCCESS, RESET_LINK_TO_EMAIL } = require('../constants/message')
@@ -24,8 +26,9 @@ const { JWT_COOKIE_MAX_AGE, JWT_COOKIE_NAME } = require('../constants/cookieConf
 const NoChangesError = require('../errors/NoChangesError')
 const { sendEmailRegistrationSuccess, sendEmailPasswordChangedSuccess, sendEmailPassswordReset } = require('../services/emailService')
 const { hashPassword } = require('../utils/passwordUtils')
-const generateJwtToken = require('../utils/generateJwtToken')
+const { generateJwtToken, verifyJwtToken } = require('../utils/jwtUtils')
 const { JWT_TOKEN_TYPE_RESET_PASSWORD } = require('../constants/jwtConfig')
+const ForbiddenError = require('../errors/ForBiddenError')
 
 const createUser = async (req, res, next) => {
   const { nickname, email, password } = req.body
@@ -56,7 +59,7 @@ const createUser = async (req, res, next) => {
 const loginUser = async (req, res, next) => {
   const { email, password } = req.body
   try {
-    const user = await userModel.findUserByCredentials({ email, password, next })
+    const user = await userModel.findUserByCredentials(email, password, next)
     const token = generateJwtToken(user._id)
     res.cookie(JWT_COOKIE_NAME, token, {
       maxAge: JWT_COOKIE_MAX_AGE,
@@ -216,21 +219,49 @@ const forgotPassword = async (req, res, next) => {
       { new: true },
     )
     await sendEmailPassswordReset(user.email, `https://yourapp.com/reset-password?token=${resetToken}`)
-    res.status(OK).send({ message: RESET_LINK_TO_EMAIL })
+    res.status(OK).send({
+      token: resetToken,
+      message: RESET_LINK_TO_EMAIL,
+    })
   } catch (err) {
     next(err)
   }
 }
 
 const resetPassword = async (req, res, next) => {
-  const { token, newPassword, passwordRepeat } = req.body
+  const { authorization } = req.headers
+  if (!authorization || !authorization.startsWith('Bearer ')) {
+    next(new UnauthorizedError(AUTHORIZATION_REQUIRED))
+  }
+  const token = authorization.replace('Bearer ', '')
+  const { newPassword, passwordRepeat } = req.body
   try {
     checkPasswords(newPassword, passwordRepeat)
     const decoded = verifyJwtToken(token, JWT_TOKEN_TYPE_RESET_PASSWORD)
+    const user = await userModel.findOne({ email: decoded.email })
+    if (!user) {
+      throw new NotFoundError(USER_NOT_FOUND)
+    }
+
+    if (user.passwordResetToken !== token) {
+      throw new ForbiddenError(INVALID_TOKEN)
+    }
+    if (Date.now() > user.passwordResetExpires) {
+      throw new UnauthorizedError(TOKEN_EXPIRED)
+    }
+    const hash = await hashPassword(newPassword)
+    await userModel.findByIdAndDelete(user._id, {
+      hash,
+      passwordResetToken: null,
+      passwordResetExpires: null,
+    })
+    await sendEmailPasswordChangedSuccess(user.email)
+    res.status(OK).send({
+      message: PASSWORD_CHANGED_SUCCESS,
+    })
   } catch (error) {
-
+    next(error)
   }
-
 }
 
 module.exports = {
@@ -242,4 +273,5 @@ module.exports = {
   deleteUser,
   editUserPassword,
   forgotPassword,
+  resetPassword,
 }

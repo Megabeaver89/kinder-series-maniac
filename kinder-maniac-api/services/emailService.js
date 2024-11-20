@@ -1,6 +1,6 @@
 const nodemailer = require('nodemailer')
 const { EMAIL, EMAIL_PASS } = require('../config')
-const { REGISTRATION_SUCCESS, PASSWORD_CHANGED_SUCCESS, PASSWORD_RESET } = require('../constants/emailMessage')
+const { REGISTRATION_SUCCESS, PASSWORD_CHANGED_SUCCESS, PASSWORD_RESET_REQUEST } = require('../constants/emailMessage')
 
 const transporter = nodemailer.createTransport({
   host: 'smtp.ethereal.email',
@@ -47,12 +47,12 @@ const sendEmailPasswordChangedSuccess = async (userEmail) => {
   )
 }
 
-const sendEmailPassswordReset = async (userEmail) => {
+const sendEmailPassswordReset = async (userEmail, link) => {
   await sendEmail(
     userEmail,
-    PASSWORD_RESET.subject,
-    PASSWORD_RESET.text,
-    PASSWORD_RESET.html,
+    PASSWORD_RESET_REQUEST.subject,
+    `${PASSWORD_RESET_REQUEST.text} ${link}`,
+    PASSWORD_RESET_REQUEST.html,
   )
 }
 module.exports = {

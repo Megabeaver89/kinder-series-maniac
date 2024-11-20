@@ -13,6 +13,9 @@ const SERIES_CANNOT_DELETE_NOT_ADDED = 'Нельзя удалить серию, 
 const PASSWORDS_NOT_THE_SAME = 'Пароли не совпадают'
 const PASSWORDS_MUST_BE_NOT_EMPTY = 'Пароли не могут быть пустыми'
 const PASSWORDS_SIMILAR = 'Новый пароль должен отличаться от старого'
+const INVALID_TOKEN = 'Неверный токен для сброса пароля'
+const TOKEN_EXPIRED = 'Срок действия токена истек'
+const ERROR_TOKEN_CHECK = 'Ошибка проверки токена'
 
 module.exports = {
   INCORRECT_EMAIL,
@@ -30,4 +33,7 @@ module.exports = {
   PASSWORDS_NOT_THE_SAME,
   PASSWORDS_MUST_BE_NOT_EMPTY,
   PASSWORDS_SIMILAR,
+  INVALID_TOKEN,
+  TOKEN_EXPIRED,
+  ERROR_TOKEN_CHECK,
 }

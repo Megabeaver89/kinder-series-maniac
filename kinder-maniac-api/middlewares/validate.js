@@ -43,7 +43,7 @@ const validateUserBodyForPatchUserInfo = celebrate({
   }),
 })
 
-const validateUserBodyForPatchUserPassword = celebrate({
+const validatePasswordChange = celebrate({
   body: Joi.object({
     newPassword: Joi
       .string()
@@ -94,6 +94,6 @@ module.exports = {
   validateUserBodyForPatchUserInfo,
   validateUserBodyForSignUp,
   validateUserBodyForSignIn,
-  validateUserBodyForPatchUserPassword,
+  validatePasswordChange,
   validateUserBodyForForgotPassword,
 }
