@@ -1,6 +1,7 @@
 const nodemailer = require('nodemailer')
 const { EMAIL, EMAIL_PASS } = require('../config')
 const { REGISTRATION_SUCCESS, PASSWORD_CHANGED_SUCCESS, PASSWORD_RESET_REQUEST } = require('../constants/emailMessage')
+const generateEmailHtml = require('../utils/generateEmailHtml')
 
 const transporter = nodemailer.createTransport({
   host: 'smtp.ethereal.email',
@@ -29,30 +30,51 @@ const sendEmail = async (userEmail, subject, text, html) => {
   }
 }
 
-const sendEmailRegistrationSuccess = async (userEmail) => {
+const sendEmailRegistrationSuccess = async (userEmail, link) => {
+  const emailHtml = generateEmailHtml(
+    REGISTRATION_SUCCESS.subject,
+    REGISTRATION_SUCCESS.body,
+    REGISTRATION_SUCCESS.buttonText,
+    `${link}`,
+    REGISTRATION_SUCCESS.color,
+  )
   await sendEmail(
     userEmail,
     REGISTRATION_SUCCESS.subject,
     REGISTRATION_SUCCESS.text,
-    REGISTRATION_SUCCESS.html,
+    emailHtml,
   )
 }
 
 const sendEmailPasswordChangedSuccess = async (userEmail) => {
+  const emailHtml = generateEmailHtml(
+    PASSWORD_CHANGED_SUCCESS.subject,
+    PASSWORD_CHANGED_SUCCESS.body,
+    null,
+    null,
+    PASSWORD_CHANGED_SUCCESS.color,
+  )
   await sendEmail(
     userEmail,
     PASSWORD_CHANGED_SUCCESS.subject,
     PASSWORD_CHANGED_SUCCESS.text,
-    PASSWORD_CHANGED_SUCCESS.html,
+    emailHtml,
   )
 }
 
 const sendEmailPassswordReset = async (userEmail, link) => {
+  const emailHtml = generateEmailHtml(
+    PASSWORD_RESET_REQUEST.subject,
+    PASSWORD_RESET_REQUEST.body,
+    PASSWORD_RESET_REQUEST.buttonText,
+    `${link}`,
+    PASSWORD_RESET_REQUEST.color,
+  )
   await sendEmail(
     userEmail,
     PASSWORD_RESET_REQUEST.subject,
-    `${PASSWORD_RESET_REQUEST.text} ${link}`,
-    PASSWORD_RESET_REQUEST.html,
+    PASSWORD_RESET_REQUEST.text,
+    emailHtml,
   )
 }
 module.exports = {

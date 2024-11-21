@@ -28,8 +28,9 @@ const { sendEmailRegistrationSuccess, sendEmailPasswordChangedSuccess, sendEmail
 const { hashPassword } = require('../utils/passwordUtils')
 const { generateJwtToken, verifyJwtToken, getTokenformHeaders } = require('../utils/jwtUtils')
 const { JWT_TOKEN_TYPE_RESET_PASSWORD } = require('../constants/jwtConfig')
-const ForbiddenError = require('../errors/ForBiddenError')
+const ForbiddenError = require('../errors/ForbiddenError')
 
+//добавить повтор пароля и проверку на него, добавить выдачу токена после регистрации и автоматический вход после регистрации
 const createUser = async (req, res, next) => {
   const { nickname, email, password } = req.body
   try {
@@ -218,7 +219,7 @@ const forgotPassword = async (req, res, next) => {
       },
       { new: true },
     )
-    await sendEmailPassswordReset(user.email, `https://yourapp.com/reset-password?token=${resetToken}`)
+    await sendEmailPassswordReset(user.email, `${resetToken}`)
     res.status(OK).send({
       token: resetToken,
       message: RESET_LINK_TO_EMAIL,
@@ -246,11 +247,15 @@ const resetPassword = async (req, res, next) => {
       throw new UnauthorizedError(TOKEN_EXPIRED)
     }
     const hash = await hashPassword(newPassword)
-    await userModel.findByIdAndDelete(user._id, {
-      hash,
-      passwordResetToken: null,
-      passwordResetExpires: null,
-    })
+    await userModel.findByIdAndUpdate(
+      user._id,
+      {
+        password: hash,
+        passwordResetToken: null,
+        passwordResetExpires: null,
+      },
+      { new: true },
+    )
     await sendEmailPasswordChangedSuccess(user.email)
     res.status(OK).send({
       message: PASSWORD_CHANGED_SUCCESS,
