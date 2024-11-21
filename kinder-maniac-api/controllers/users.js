@@ -26,7 +26,7 @@ const { JWT_COOKIE_MAX_AGE, JWT_COOKIE_NAME } = require('../constants/cookieConf
 const NoChangesError = require('../errors/NoChangesError')
 const { sendEmailRegistrationSuccess, sendEmailPasswordChangedSuccess, sendEmailPassswordReset } = require('../services/emailService')
 const { hashPassword } = require('../utils/passwordUtils')
-const { generateJwtToken, verifyJwtToken } = require('../utils/jwtUtils')
+const { generateJwtToken, verifyJwtToken, getTokenformHeaders } = require('../utils/jwtUtils')
 const { JWT_TOKEN_TYPE_RESET_PASSWORD } = require('../constants/jwtConfig')
 const ForbiddenError = require('../errors/ForBiddenError')
 
@@ -229,11 +229,7 @@ const forgotPassword = async (req, res, next) => {
 }
 
 const resetPassword = async (req, res, next) => {
-  const { authorization } = req.headers
-  if (!authorization || !authorization.startsWith('Bearer ')) {
-    next(new UnauthorizedError(AUTHORIZATION_REQUIRED))
-  }
-  const token = authorization.replace('Bearer ', '')
+  const token = getTokenformHeaders(req.headers)
   const { newPassword, passwordRepeat } = req.body
   try {
     checkPasswords(newPassword, passwordRepeat)

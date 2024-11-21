@@ -4,11 +4,7 @@ const userController = require('../controllers/users')
 const {
   validateUserBodyForPatchUserInfo,
   validatePasswordChange,
-  validateUserBodyForForgotPassword,
 } = require('../middlewares/validate')
-
-router.post('/forgot-password', validateUserBodyForForgotPassword, userController.forgotPassword)
-router.post('/reset-password', validatePasswordChange, userController.resetPassword)
 
 router.use(auth)
 

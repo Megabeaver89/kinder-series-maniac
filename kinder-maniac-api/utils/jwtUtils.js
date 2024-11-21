@@ -3,7 +3,15 @@ const { JWT_SECRET_LOGIN, JWT_SECRET_RESET_PASSWORD } = require('../config')
 const { JWT_EXPIRATION_THREE_DAYS, JWT_EXPIRATION_ONE_HOUR, JWT_TOKEN_TYPE_LOGIN } = require('../constants/jwtConfig')
 const { JWT_TOKEN_TYPE_RESET_PASSWORD } = require('../constants/jwtConfig')
 const UnauthorizedError = require('../errors/UnauthorizedError')
-const { INVALID_TOKEN, TOKEN_EXPIRED, ERROR_TOKEN_CHECK } = require('../constants/errorMessage')
+const { INVALID_TOKEN, TOKEN_EXPIRED, ERROR_TOKEN_CHECK, AUTHORIZATION_REQUIRED } = require('../constants/errorMessage')
+
+const getTokenformHeaders = (headers) => {
+  const { authorization } = headers
+  if (!authorization || !authorization.startsWith('Bearer ')) {
+    throw new UnauthorizedError(AUTHORIZATION_REQUIRED)
+  }
+  return authorization.replace('Bearer ', '')
+}
 
 const getJwtSecret = (type) => {
   switch (type) {
@@ -44,6 +52,7 @@ const generateJwtToken = (userIdentifier, type = JWT_TOKEN_TYPE_LOGIN) => {
 }
 
 module.exports = {
+  getTokenformHeaders,
   generateJwtToken,
   verifyJwtToken,
 }
